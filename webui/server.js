@@ -40,6 +40,11 @@ app.post('/upload', async (req, res) => {
         const converterType = req.body.converterType;
         const fileBuffer = file.data;
 
+        // Validate file type
+        if (!['pdf', 'docx', 'pptx', 'xlsx'].includes(fileType)) {
+            throw new Error(`Unsupported file type: ${fileType}`);
+        }
+
         console.log('Processing file:', {
             fileName: file.name,
             fileType,
@@ -75,15 +80,31 @@ app.post('/upload', async (req, res) => {
             } : undefined
         });
 
-        const markdown = await downCraft(fileBuffer, fileType, options);
-        
-        res.json({ 
-            message: 'File processed successfully',
-            markdown
-        });
+        try {
+            const markdown = await downCraft(fileBuffer, fileType, options);
+            
+            // Validate markdown output
+            if (typeof markdown !== 'string') {
+                throw new Error('Invalid markdown output format');
+            }
+
+            res.json({ 
+                message: 'File processed successfully',
+                markdown
+            });
+        } catch (conversionError) {
+            // Log the full error for debugging
+            console.error('Conversion error details:', conversionError);
+            
+            // Send a cleaner error message to the client
+            throw new Error(`Document conversion failed: ${conversionError.message}`);
+        }
     } catch (error) {
         console.error('Error processing file:', error);
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ 
+            error: error.message,
+            details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        });
     }
 });
 
