@@ -28,6 +28,7 @@ async function processPdfWithLlm(pdfBuffer, llmParams) {
     model: llmParams?.model || process.env.LLM_MODEL,
     systemPrompt: llmParams?.systemPrompt || process.env.LLM_OCR_SYSTEM_PROMPT,
     userPrompt: llmParams?.userPrompt || process.env.LLM_OCR_USER_PROMPT,
+    temperature: llmParams?.temperature || parseFloat(process.env.LLM_TEMPERATURE) || 0
   };
   if (!llmParams.baseURL || !llmParams.apiKey || !llmParams.model) {
     throw new Error('LLM parameters must include baseURL, apiKey, and model');

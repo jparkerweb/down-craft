@@ -13,6 +13,8 @@ export async function llmToMarkdown(
 
         const systemPrompt = llmParams.systemPrompt;
         const userPrompt = llmParams.userPrompt;
+        const temperature = llmParams.temperature;
+
         const finalImageUrl = isRemoteFile(image)
             ? image
             : `data:image/${imageType};base64,${encodeImageBuffer(image)}`;
@@ -39,7 +41,7 @@ export async function llmToMarkdown(
                   ],
                 },
               ],
-            temperature: 0.1,
+            temperature,
             stream: false
         });
 

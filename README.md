@@ -52,6 +52,9 @@ Converts a document buffer to markdown format.
     - `baseURL` (string): Base URL for the LLM API
     - `apiKey` (string): API key for the LLM service
     - `model` (string): Model to use for OCR
+    - `systemPrompt` (string, optional): System prompt for the LLM (see `.env.example` for the default)
+    - `userPrompt` (string, optional): User prompt for the LLM (see `.env.example` for the default)
+    - `temperature` (number, optional): Temperature for the LLM (default: 0)
 
 Returns: Promise<string> - The markdown content
 
