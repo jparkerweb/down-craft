@@ -5,6 +5,8 @@ It uses `tesseract.js`, `mammoth`, `pdf.js`, and `turndown` to convert documents
 
 ![down-craft](https://raw.githubusercontent.com/jparkerweb/down-craft/main/down-craft.jpg)
 
+## Online Web Demo
+https://down-craft.dyndns.org/
 
 ## Installation
 
