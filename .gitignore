@@ -2,3 +2,7 @@ node_modules/
 temp-images/
 .env
 eng.traineddata
+
+webui/node_modules/
+webui/server.bat
+webui/.env
