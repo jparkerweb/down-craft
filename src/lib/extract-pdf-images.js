@@ -99,7 +99,7 @@ export async function* extractPdfImages(pdfBuffer, options = {}) {
               }
             }
           } catch (e) {
-            console.warn(`Failed to process image ${imgName} on page ${pageNum}:`, e.message);
+            // console.warn(`Failed to process image ${imgName} on page ${pageNum}:`, e.message);
           }
         }
       }
