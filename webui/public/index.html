@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Down Craft</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <div class="background-animation"></div>
+    <div class="container">
+        <div class="title-section">
+            <a href="https://www.npmjs.com/package/down-craft" class="npm-link" target="_blank">
+                <i class="fa-brands fa-npm"></i>
+            </a>
+            <h1 class="title"><a href="index.html">📑 Down Craft</a></h1>
+            <a href="https://github.com/jparkerweb/down-craft" class="github-link" target="_blank">
+                <i class="fa-brands fa-github"></i>
+            </a>
+        </div>
+        <p class="subtitle">select a document to convert to markdown</p>
+        <div class="upload-section">
+            <div>
+                <input type="file" id="fileInput" accept=".pdf,.docx,.pptx,.xlsx" />
+                <label for="fileInput" class="file-label">
+                    <span>Choose File</span>
+                    <span id="fileName">click to select a .pdf, .docx, .pptx, or .xlsx file</span>
+                </label>
+            </div>
+            <div id="converterOptions" class="hidden">
+                <select id="converterType">
+                    <option value="standard">Standard</option>
+                    <option value="llm">LLM</option>
+                    <option value="ocr">OCR</option>
+                </select>
+            </div>
+            <button id="processButton">Process Document</button>
+        </div>
+        <div id="markdownOutput" class="markdown-output">
+            <div class="spinner"></div>
+            <div class="content"></div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

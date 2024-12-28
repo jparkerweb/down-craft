@@ -1,0 +1,17 @@
+{
+  "name": "down-craft-webui",
+  "version": "1.0.0",
+  "description": "Web UI for processing documents",
+  "main": "server.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "clean": "rm -rf node_modules && rm -rf package-lock.json && npm install"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "express-fileupload": "^1.4.3",
+    "dotenv": "^16.4.7",
+    "down-craft": "^0.1.1"
+  }
+}
