@@ -1,0 +1,37 @@
+{
+  "name": "down-craft",
+  "version": "0.1.0",
+  "description": "Convert various document types (PDF, DOCX, PPTX, XLSX) to Markdown format",
+  "main": "src/index.js",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "scripts": {
+    "clean": "rm -rf node_modules && rm -rf package-lock.json && npm install"
+  },
+  "keywords": [
+    "markdown",
+    "converter",
+    "pdf",
+    "docx",
+    "pptx",
+    "xlsx",
+    "document"
+  ],
+  "author": "Justin Parker",
+  "license": "Apache-2.0",
+  "dependencies": {
+    "@opendocsg/pdf2md": "^0.2.1",
+    "canvas": "^3.0.0",
+    "dotenv": "^16.4.7",
+    "mammoth": "^1.8.0",
+    "openai": "^4.77.0",
+    "pdfjs-dist": "3.11.174",
+    "pptx-in-html-out": "^0.0.2",
+    "tesseract.js": "^5.1.1",
+    "turndown": "7.2.0",
+    "turndown-plugin-gfm": "^1.0.2",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
+  }
+}
