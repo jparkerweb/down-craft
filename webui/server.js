@@ -47,6 +47,16 @@ app.post('/upload', async (req, res) => {
             fileSize: file.size
         });
 
+        // For LLM conversion, ensure we have the required environment variables
+        if (converterType === 'llm') {
+            const requiredEnvVars = ['LLM_BASE_URL', 'LLM_API_KEY', 'LLM_MODEL'];
+            const missingVars = requiredEnvVars.filter(v => !process.env[v]);
+            
+            if (missingVars.length > 0) {
+                throw new Error(`Missing required environment variables: ${missingVars.join(', ')}`);
+            }
+        }
+
         const options = {
             pdfConverterType: fileType === 'pdf' ? converterType : undefined,
             llmParams: converterType === 'llm' ? {
