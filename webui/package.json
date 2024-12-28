@@ -1,7 +1,4 @@
 {
-  "name": "down-craft-webui",
-  "version": "1.0.0",
-  "description": "Web UI for processing documents",
   "main": "server.js",
   "type": "module",
   "scripts": {
