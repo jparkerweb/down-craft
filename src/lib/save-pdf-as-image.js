@@ -1,5 +1,4 @@
-import pkg from 'pdfjs-dist';
-const { getDocument } = pkg;
+import { getDocument, OPS } from 'pdfjs-dist';
 import { promises as fs } from 'fs';
 import path from 'path';
 import canvas from 'canvas';
@@ -8,44 +7,71 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Import worker separately
-import * as PdfWorker from 'pdfjs-dist/build/pdf.worker.entry.js';
-if (typeof globalThis.window === 'undefined') {
-  const { Worker } = await import('worker_threads');
-  globalThis.Worker = Worker;
+// Add Promise.withResolvers polyfill
+if (!Promise.withResolvers) {
+  Promise.withResolvers = function() {
+    let resolve, reject;
+    const promise = new Promise((res, rej) => {
+      resolve = res;
+      reject = rej;
+    });
+    return { promise, resolve, reject };
+  };
 }
 
-/**
- * Converts a PDF buffer to a series of PNG images
- * @param {Buffer} pdfBuffer - Buffer containing the PDF data
- * @param {string} outputDir - Directory to save the images
- * @param {number} scale - Scale factor for the output images (default: 2.0)
- * @returns {Promise<string[]>} Array of paths to the generated images
- */
+// Initialize PDF.js worker
+import { PDFWorker } from 'pdfjs-dist';
+
+function createWorker() {
+  let resolve, reject;
+  const promise = new Promise((res, rej) => {
+    resolve = res;
+    reject = rej;
+  });
+  
+  const worker = {
+    _worker: new PDFWorker(),
+    promise,
+    resolve,
+    reject
+  };
+  return worker;
+}
+
+const worker = createWorker();
+
+// Create CanvasFactory class
+class NodeCanvasFactory {
+  create(width, height) {
+    const canvasInstance = canvas.createCanvas(width, height);
+    return {
+      canvas: canvasInstance,
+      context: canvasInstance.getContext('2d'),
+    };
+  }
+
+  reset(canvasAndContext, width, height) {
+    canvasAndContext.canvas.width = width;
+    canvasAndContext.canvas.height = height;
+  }
+
+  destroy(canvasAndContext) {
+    // no need to destroy anything
+  }
+}
+
 async function savePDFAsImages(pdfBuffer, outputDir, scale = 2.0) {
   // Create a fresh Uint8Array by copying the data
   const pdfData = new Uint8Array(pdfBuffer);
+  
+  const canvasFactory = new NodeCanvasFactory();
   
   const doc = await getDocument({
     data: pdfData,
     useSystemFonts: true,
     standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/standard_fonts/'),
-    canvasFactory: {
-      create: function(width, height) {
-        const canvasInstance = canvas.createCanvas(width, height);
-        return {
-          canvas: canvasInstance,
-          context: canvasInstance.getContext('2d'),
-        };
-      },
-      reset: function(canvasAndContext, width, height) {
-        canvasAndContext.canvas.width = width;
-        canvasAndContext.canvas.height = height;
-      },
-      destroy: function(canvasAndContext) {
-        // no need to destroy anything
-      }
-    }
+    worker: worker._worker,
+    CanvasFactory: NodeCanvasFactory
   }).promise;
 
   const imagePaths = [];
@@ -62,22 +88,7 @@ async function savePDFAsImages(pdfBuffer, outputDir, scale = 2.0) {
     await page.render({
       canvasContext: context,
       viewport: viewport,
-      canvasFactory: {
-        create: function(width, height) {
-          const canvas = canvasInstance;
-          return {
-            canvas,
-            context: context,
-          };
-        },
-        reset: function(canvasAndContext, width, height) {
-          canvasAndContext.canvas.width = width;
-          canvasAndContext.canvas.height = height;
-        },
-        destroy: function(canvasAndContext) {
-          // no need to destroy anything
-        }
-      }
+      CanvasFactory: NodeCanvasFactory
     }).promise;
 
     const imagePath = path.join(outputDir, `page-${pageNum}.png`);
@@ -88,6 +99,5 @@ async function savePDFAsImages(pdfBuffer, outputDir, scale = 2.0) {
 
   return imagePaths;
 }
-
 
 export { savePDFAsImages };

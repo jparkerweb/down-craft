@@ -47,7 +47,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
     color: var(--text-primary);
     background: linear-gradient(rgba(0, 0, 0, 0.85), rgba(0, 0, 0, 0.85)),
-                url('https://raw.githubusercontent.com/jparkerweb/down-craft/main/down-craft.jpg') no-repeat center center fixed;
+                url('https://raw.githubusercontent.com/jparkerweb/down-craft/refs/heads/main/down-craft.jpg') no-repeat center center fixed;
     background-size: cover;
     min-height: 100vh;
 }

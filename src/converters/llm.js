@@ -2,8 +2,7 @@
 // -- Convert PDF to Markdown using LLM-based OCR --
 // -----------------------------------------------------------------
 
-import { createCanvas, DOMMatrix, DOMPoint } from "canvas";
-import { extractPdfImages, saveImage } from "../lib/extract-pdf-images.js";
+import { createCanvas, DOMMatrix, DOMPoint, ImageData } from "canvas";
 import { savePDFAsImages } from "../lib/save-pdf-as-image.js";
 import { llmToMarkdown } from "../lib/llm-to-markdown.js";
 import fs from "fs/promises";
@@ -17,6 +16,7 @@ globalThis.DOMMatrix = DOMMatrix;
 globalThis.DOMPoint = DOMPoint;
 globalThis.createCanvas = createCanvas;
 globalThis.Path2D = global.Path2D;
+globalThis.ImageData = ImageData;
 
 // -----------------------------------------------------------------
 // -- Convert PDF to images and process with LLM OCR --
@@ -41,18 +41,6 @@ async function processPdfWithLlm(pdfBuffer, llmParams) {
     const currentTime = Date.now();
     const outputDir = path.join(tempOutputBaseDir, currentTime.toString());
     await fs.mkdir(outputDir, { recursive: true });
-
-    // Extract embedded images
-    for await (const image of extractPdfImages(pdfData, {
-      imageTypes: ["jpeg", "png"],
-      minSize: 1000,
-    })) {
-      const filename = path.join(
-        outputDir,
-        `embedded-image-${image.pageNumber}.${image.type}`
-      );
-      await saveImage(image.data, filename);
-    }
 
     // Convert PDF pages to images
     const pagesDir = path.join(outputDir, "pages");

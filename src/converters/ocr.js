@@ -3,7 +3,6 @@
 // -----------------------------------------------------------------
 
 import { createCanvas, DOMMatrix, DOMPoint } from "canvas";
-import { extractPdfImages, saveImage } from "../lib/extract-pdf-images.js";
 import { savePDFAsImages } from "../lib/save-pdf-as-image.js";
 import { performOCRWithMarkdown } from "../lib/image-ocr.js";
 import fs from "fs/promises";
@@ -28,18 +27,6 @@ async function processPdfWithOcr(pdfBuffer) {
     const currentTime = Date.now();
     const outputDir = path.join(tempOutputBaseDir, currentTime.toString());
     await fs.mkdir(outputDir, { recursive: true });
-
-    // Extract embedded images
-    for await (const image of extractPdfImages(pdfData, {
-      imageTypes: ["jpeg", "png"],
-      minSize: 1000,
-    })) {
-      const filename = path.join(
-        outputDir,
-        `embedded-image-${image.pageNumber}.${image.type}`
-      );
-      await saveImage(image.data, filename);
-    }
 
     // Convert PDF pages to images
     const pagesDir = path.join(outputDir, "pages");

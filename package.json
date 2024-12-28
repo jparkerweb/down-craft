@@ -31,7 +31,7 @@
     "dotenv": "^16.4.7",
     "mammoth": "^1.8.0",
     "openai": "^4.77.0",
-    "pdfjs-dist": "3.11.174",
+    "pdfjs-dist": "^4.9.155",
     "pptx-in-html-out": "^0.0.2",
     "tesseract.js": "^5.1.1",
     "turndown": "7.2.0",

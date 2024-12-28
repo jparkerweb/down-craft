@@ -15,7 +15,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 const app = express();
-const port = 3131;
+const port = process.env.PORT || 3131;
 
 // Middleware
 app.use(express.json());
