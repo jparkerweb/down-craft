@@ -32,7 +32,7 @@
     "dotenv": "^16.4.7",
     "mammoth": "^1.9.0",
     "openai": "^4.77.0",
-    "pdfjs-dist": "4.10.38+legacy",
+    "pdfjs-dist": "^4.10.38",
     "pngjs": "^7.0.0",
     "pptx-in-html-out": "^0.0.2",
     "scribe.js-ocr": "^0.6.1",

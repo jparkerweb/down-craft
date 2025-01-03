@@ -1,4 +1,9 @@
 // -----------------------------------------------------------------
+// -- Polyfills
+// -----------------------------------------------------------------
+import './node-polyfills.js';
+
+// -----------------------------------------------------------------
 // -- Express server setup for document processing
 // -----------------------------------------------------------------
 import express from 'express';
@@ -7,7 +12,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { downCraft } from 'down-craft';
 import dotenv from 'dotenv';
-import fs from 'fs/promises';
+import * as fs from 'node:fs/promises';
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
@@ -54,7 +59,7 @@ app.post('/upload', async (req, res) => {
         const converterType = req.body.converterType;
         
         // Read file buffer from temp file
-        const fileBuffer = await fs.promises.readFile(file.tempFilePath);
+        const fileBuffer = await fs.readFile(file.tempFilePath);
 
         // Validate file size
         if (fileBuffer.length === 0) {

@@ -2,12 +2,13 @@
 // -- Convert PDF to Markdown with image placeholders and OCR integration --
 // -----------------------------------------------------------------
 
-import { getDocument, OPS, PDFWorker } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { getDocument, OPS } from 'pdfjs-dist';
 import path from 'path';
 import fs from 'fs/promises';
 import { existsSync, rmSync, readdirSync, statSync } from 'fs';
 import { fileURLToPath } from 'url';
 import { saveImagesFromPDF } from '../lib/save-images-from-pdf.js';
+import { PDFWorker } from 'pdfjs-dist';
 import { processImagesWithOCR } from '../lib/process-images-with-ocr.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -279,9 +280,9 @@ async function convertPdfWithPlaceholders(pdfBuffer, outputDir, imageOcrMap = {}
     const doc = await getDocument({
       data: pdfData,
       useSystemFonts: true,
-      standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/generic/'),
-      worker: worker._worker,
-      cMapUrl: path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/generic/'),
+      standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/standard_fonts/'),
+      worker,
+      cMapUrl: path.join(__dirname, '../node_modules/pdfjs-dist/cmaps/'),
       cMapPacked: true,
     }).promise;
 

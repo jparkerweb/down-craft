@@ -1,4 +1,4 @@
-import { getDocument, OPS, PDFWorker } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { getDocument, OPS } from 'pdfjs-dist';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -18,6 +18,8 @@ const __dirname = path.dirname(__filename);
 // -----------------------------------------------------------------
 // -- Initialize PDF.js worker --
 // -----------------------------------------------------------------
+import { PDFWorker } from 'pdfjs-dist';
+
 function createWorker() {
   const worker = {
     _worker: new PDFWorker(),
@@ -185,9 +187,9 @@ async function saveImagesFromPDF(pdfBuffer, outputDir, options = {}) {
   const doc = await getDocument({
     data: pdfData,
     useSystemFonts: true,
-    standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/generic/'),
+    standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/standard_fonts/'),
     worker: worker._worker,
-    cMapUrl: path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/generic/'),
+    cMapUrl: path.join(__dirname, '../node_modules/pdfjs-dist/cmaps/'),
     cMapPacked: true,
   }).promise;
 
