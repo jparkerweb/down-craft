@@ -2,7 +2,8 @@
 // -- Convert PDF to Markdown using LLM-based OCR --
 // -----------------------------------------------------------------
 
-import { createCanvas, DOMMatrix, DOMPoint, ImageData } from "canvas";
+import pkg from 'canvas';
+const { createCanvas, DOMMatrix, DOMPoint, ImageData } = pkg;
 import { savePDFAsImages } from "../lib/save-pdf-as-image.js";
 import { llmToMarkdown } from "../lib/llm-to-markdown.js";
 import fs from "fs/promises";
@@ -11,11 +12,33 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+// savePDFAsImages options
+const llmPageScale = parseInt(process.env.LLM_PAGE_SCALE) || 2;
+const llmPagesPerBatch = parseInt(process.env.LLM_PAGES_PER_BATCH) || 8;  // Optimized for LLM API limits and context window
+
+// Minimal Path2D polyfill
+class Path2DPolyfill {
+  constructor(path) {
+    this.path = path;
+  }
+  
+  addPath() {}
+  closePath() {}
+  moveTo() {}
+  lineTo() {}
+  bezierCurveTo() {}
+  quadraticCurveTo() {}
+  arc() {}
+  arcTo() {}
+  ellipse() {}
+  rect() {}
+}
+
 // Add polyfills for canvas
 globalThis.DOMMatrix = DOMMatrix;
 globalThis.DOMPoint = DOMPoint;
 globalThis.createCanvas = createCanvas;
-globalThis.Path2D = global.Path2D;
+globalThis.Path2D = Path2DPolyfill;
 globalThis.ImageData = ImageData;
 
 // -----------------------------------------------------------------
@@ -45,13 +68,13 @@ async function processPdfWithLlm(pdfBuffer, llmParams) {
 
     // Convert PDF pages to images
     const pagesDir = path.join(outputDir, "pages");
-    const pageImagePaths = await savePDFAsImages(pdfData, pagesDir, 2.0);
+    await savePDFAsImages(pdfData, pagesDir, llmPageScale, llmPagesPerBatch);
 
     // Process images with LLM OCR
     const imagePaths = await fs.readdir(pagesDir);
     const sortedPaths = imagePaths.sort((a, b) => {
-      const pageA = parseInt(a.match(/page-(\d+)/)?.[1] || "0");
-      const pageB = parseInt(b.match(/page-(\d+)/)?.[1] || "0");
+      const pageA = parseInt(a.match(/batch-(\d+)/)?.[1] || "0");
+      const pageB = parseInt(b.match(/batch-(\d+)/)?.[1] || "0");
       return pageA - pageB;
     });
 
@@ -59,23 +82,21 @@ async function processPdfWithLlm(pdfBuffer, llmParams) {
     for (const imagePath of sortedPaths) {
       try {
         const imageBuffer = await fs.readFile(path.join(pagesDir, imagePath));
-        const imageType = imagePath.split(".").pop();
-        let ocrResult = await llmToMarkdown(imageBuffer, imageType, llmParams);
+        let ocrResult = await llmToMarkdown(imageBuffer, 'jpeg', llmParams);
 
         // Retry once on error
         if (ocrResult.startsWith("Error")) {
           await new Promise((resolve) => setTimeout(resolve, 1000));
-          ocrResult = await llmToMarkdown(imageBuffer, imageType, llmParams);
+          ocrResult = await llmToMarkdown(imageBuffer, 'jpeg', llmParams);
           
           if (ocrResult.startsWith("Error")) {
-            // console.error(`Failed to process ${imagePath} after retry:`, ocrResult);
             continue;
           }
         }
 
         markdown += ocrResult + "\n\n";
       } catch (error) {
-        // console.error(`Failed to process ${imagePath}:`, error);
+        // console.error(`Failed to process batch ${imagePath}:`, error);
       }
     }
 

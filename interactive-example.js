@@ -112,15 +112,35 @@ async function main() {
       console.log('1. standard');
       console.log('2. llm');
       console.log('3. ocr');
+      console.log('4. onnx');
+      console.log('5. scribe');
+      console.log('6. scribe-image');
+      console.log('7. pdf-images');
+      console.log('8. scribe-with-image-placeholder');
+      console.log('9. hybrid');
       
-      const converterAnswer = await question('\nEnter converter type (1-3): ');
+      const converterAnswer = await question('\nEnter converter type (1-9): ');
       let pdfConverterType = 'standard';
       if (converterAnswer === '2') pdfConverterType = 'llm';
       if (converterAnswer === '3') pdfConverterType = 'ocr';
+      if (converterAnswer === '4') pdfConverterType = 'onnx';
+      if (converterAnswer === '5') pdfConverterType = 'scribe';
+      if (converterAnswer === '6') pdfConverterType = 'scribe-image';
+      if (converterAnswer === '7') pdfConverterType = 'pdf-images';
+      if (converterAnswer === '8') pdfConverterType = 'scribe-with-image-placeholder';
+      if (converterAnswer === '9') pdfConverterType = 'hybrid';
       
       if (pdfConverterType === 'llm') {
         const llmParams = await getLlmParams();
         options = { pdfConverterType, llmParams };
+      } else if (pdfConverterType === 'scribe-with-image-placeholder') {
+        options = {
+          pdfConverterType,
+          useOcr: true,
+          batchSize: 5,
+          useCache: true,
+          keepPlaceholders: false
+        };
       } else {
         options = { pdfConverterType };
       }
@@ -132,16 +152,34 @@ async function main() {
       
       console.log(`\nConverting ${selectedFile}...`);
       
+      // start timer
+      console.time('Conversion time');
+      
       // Convert to markdown
-      const markdown = await downCraft(fileBuffer, fileType, options);
+      const result = await downCraft(fileBuffer, fileType, options);
+      
+      // Handle both string and object returns
+      const markdown = typeof result === 'string' ? result : result.text;
       
       // Write to example.md
       await fs.writeFile('example.md', markdown, 'utf8');
       console.log('\nMarkdown written to example.md');
       
+      // If we have image info, log it
+      if (result.images && result.imageDir) {
+        console.log(`\nImages saved to: ${result.imageDir}`);
+        console.log('\nExtracted images:');
+        result.images.forEach(img => {
+          console.log(`- ${img.path}`);
+        });
+      }
+      
       console.log('\nConverted Markdown:');
       console.log('==================');
       console.log(markdown);
+
+      // end timer
+      console.timeEnd('Conversion time');
       
     } catch (error) {
       console.error('Conversion error:', error.message);

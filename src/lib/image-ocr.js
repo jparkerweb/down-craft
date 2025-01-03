@@ -7,8 +7,8 @@ export async function performOCR(fileBuffer, imageType) {
   const worker = await Tesseract.createWorker();
   try {
     const base64Image = `data:image/${imageType};base64,${fileBuffer.toString('base64')}`;
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
+    // await worker.loadLanguage('eng');
+    // await worker.initialize('eng');
     
     const result = await worker.recognize(base64Image, {
       tessedit_pageseg_mode: 1, // Automatic page segmentation with OSD
@@ -29,8 +29,8 @@ export async function performOCR(fileBuffer, imageType) {
 export async function batchOCR(images) {
   const worker = await Tesseract.createWorker();
   try {
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
+    // await worker.loadLanguage('eng');
+    // await worker.initialize('eng');
     
     const results = await Promise.all(
       images.map(async ({ buffer, type }) => {
@@ -58,8 +58,8 @@ export async function performOCRWithMarkdown(fileBuffer, imageType) {
   const worker = await Tesseract.createWorker();
   try {
     const base64Image = `data:image/${imageType};base64,${fileBuffer.toString('base64')}`;
-    await worker.loadLanguage('eng');
-    await worker.initialize('eng');
+    // await worker.loadLanguage('eng');
+    // await worker.initialize('eng');
 
     const result = await worker.recognize(base64Image, {
       tessedit_pageseg_mode: 1,

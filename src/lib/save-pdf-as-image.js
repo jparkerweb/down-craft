@@ -60,7 +60,28 @@ class NodeCanvasFactory {
   }
 }
 
-async function savePDFAsImages(pdfBuffer, outputDir, scale = 2.0) {
+// -----------------------------------------------------------------
+// -- Convert canvas to grayscale --
+// -----------------------------------------------------------------
+function convertToGrayscale(context, width, height) {
+  const imageData = context.getImageData(0, 0, width, height);
+  const data = imageData.data;
+  
+  for (let i = 0; i < data.length; i += 4) {
+    const r = data[i];
+    const g = data[i + 1];
+    const b = data[i + 2];
+    // Convert to grayscale using luminosity method
+    const gray = 0.299 * r + 0.587 * g + 0.114 * b;
+    data[i] = gray;
+    data[i + 1] = gray;
+    data[i + 2] = gray;
+  }
+  
+  context.putImageData(imageData, 0, 0);
+}
+
+async function savePDFAsImages(pdfBuffer, outputDir, scale, pagesPerBatch, jpegQuality = 0.85) {
   // Create a fresh Uint8Array by copying the data
   const pdfData = new Uint8Array(pdfBuffer);
   
@@ -77,22 +98,53 @@ async function savePDFAsImages(pdfBuffer, outputDir, scale = 2.0) {
   const imagePaths = [];
   await fs.mkdir(outputDir, { recursive: true });
 
-  // Convert each page to an image
-  for (let pageNum = 1; pageNum <= doc.numPages; pageNum++) {
-    const page = await doc.getPage(pageNum);
-    const viewport = page.getViewport({ scale });
+  // Process pages in batches
+  for (let startPage = 1; startPage <= doc.numPages; startPage += pagesPerBatch) {
+    const endPage = Math.min(startPage + pagesPerBatch - 1, doc.numPages);
+    let totalHeight = 0;
+    let maxWidth = 0;
+    const pageCanvases = [];
 
-    const canvasInstance = canvas.createCanvas(viewport.width, viewport.height);
-    const context = canvasInstance.getContext('2d');
+    // First pass: render pages and calculate dimensions
+    for (let pageNum = startPage; pageNum <= endPage; pageNum++) {
+      const page = await doc.getPage(pageNum);
+      const viewport = page.getViewport({ scale });
 
-    await page.render({
-      canvasContext: context,
-      viewport: viewport,
-      CanvasFactory: NodeCanvasFactory
-    }).promise;
+      const canvasInstance = canvas.createCanvas(viewport.width, viewport.height);
+      const context = canvasInstance.getContext('2d');
 
-    const imagePath = path.join(outputDir, `page-${pageNum}.png`);
-    const buffer = canvasInstance.toBuffer('image/png');
+      await page.render({
+        canvasContext: context,
+        viewport: viewport,
+        CanvasFactory: NodeCanvasFactory
+      }).promise;
+
+      // Convert to grayscale after rendering
+      convertToGrayscale(context, viewport.width, viewport.height);
+
+      pageCanvases.push(canvasInstance);
+      totalHeight += viewport.height;
+      maxWidth = Math.max(maxWidth, viewport.width);
+    }
+
+    // Create combined canvas
+    const combinedCanvas = canvas.createCanvas(maxWidth, totalHeight);
+    const combinedContext = combinedCanvas.getContext('2d');
+
+    // Second pass: draw pages onto combined canvas
+    let yOffset = 0;
+    for (const pageCanvas of pageCanvases) {
+      combinedContext.drawImage(pageCanvas, 0, yOffset);
+      yOffset += pageCanvas.height;
+    }
+
+    // Convert final combined image to grayscale
+    convertToGrayscale(combinedContext, maxWidth, totalHeight);
+
+    // Save combined image as JPEG
+    const batchNum = Math.floor((startPage - 1) / pagesPerBatch) + 1;
+    const imagePath = path.join(outputDir, `batch-${batchNum}.jpg`);
+    const buffer = combinedCanvas.toBuffer('image/jpeg', { quality: jpegQuality });
     await fs.writeFile(imagePath, buffer);
     imagePaths.push(imagePath);
   }

@@ -18,10 +18,12 @@ const app = express();
 const port = process.env.PORT || 3131;
 
 // Middleware
-app.use(express.json());
+app.use(express.json({ limit: '50mb' }));
 app.use(express.static('public'));
 app.use(fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
+    abortOnLimit: true,
+    responseOnLimit: 'File size limit exceeded. Maximum file size is 50MB.',
 }));
 
 // Routes
