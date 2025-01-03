@@ -17,13 +17,24 @@ const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3131;
 
+// Increase timeouts
+app.use((req, res, next) => {
+    // Set timeout to 10 minutes
+    req.setTimeout(600000);
+    res.setTimeout(600000);
+    next();
+});
+
 // Middleware
-app.use(express.json({ limit: '50mb' }));
+app.use(express.json({ limit: '100mb' }));
 app.use(express.static('public'));
 app.use(fileUpload({
     limits: { fileSize: 50 * 1024 * 1024 }, // 50MB max file size
     abortOnLimit: true,
     responseOnLimit: 'File size limit exceeded. Maximum file size is 50MB.',
+    useTempFiles: true,
+    tempFileDir: '/tmp/',
+    debug: true
 }));
 
 // Routes
@@ -108,6 +119,15 @@ app.post('/upload', async (req, res) => {
             details: process.env.NODE_ENV === 'development' ? error.stack : undefined
         });
     }
+});
+
+// Error handling middleware
+app.use((err, req, res, next) => {
+    console.error('Server error:', err);
+    res.status(500).json({ 
+        error: 'Server error', 
+        details: err.message 
+    });
 });
 
 app.listen(port, () => {
