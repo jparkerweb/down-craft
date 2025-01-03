@@ -8,8 +8,7 @@ import processImagesWithOCR from '../lib/process-images-with-ocr.js';
 import path from 'path';
 import fs from 'fs/promises';
 import { rm } from 'fs/promises';
-import globPkg from 'glob';
-const { glob } = globPkg;
+import { glob } from 'glob';
 
 /**
  * Clean up temp-images folders older than 10 minutes
