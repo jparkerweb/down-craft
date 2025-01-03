@@ -8,7 +8,7 @@
     ".": "./src/index.js"
   },
   "scripts": {
-    "clean": "rm -rf node_modules && rm -rf package-lock.json && npm install"
+    "clean": "npx rimraf node_modules && npx rimraf package-lock.json && npm install"
   },
   "repository": {
     "type": "git",
@@ -28,11 +28,11 @@
   "dependencies": {
     "@gutenye/ocr-node": "^1.4.8",
     "@opendocsg/pdf2md": "^0.2.1",
-    "canvas": "^3.0.0",
+    "canvas": "^3.0.1",
     "dotenv": "^16.4.7",
-    "mammoth": "^1.8.0",
+    "mammoth": "^1.9.0",
     "openai": "^4.77.0",
-    "pdfjs-dist": "^4.9.155",
+    "pdfjs-dist": "^4.10.38",
     "pngjs": "^7.0.0",
     "pptx-in-html-out": "^0.0.2",
     "scribe.js-ocr": "^0.6.1",

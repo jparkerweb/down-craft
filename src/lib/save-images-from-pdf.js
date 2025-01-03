@@ -2,8 +2,15 @@ import { getDocument, OPS } from 'pdfjs-dist';
 import { promises as fs } from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { createCanvas, Image } from 'canvas';
+import canvas from 'canvas';
 import { PNG } from 'pngjs';
+
+const { createCanvas, Image, Path2D } = canvas;
+
+// Polyfill Path2D if not available
+if (typeof globalThis.Path2D === 'undefined') {
+  globalThis.Path2D = Path2D;
+}
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
