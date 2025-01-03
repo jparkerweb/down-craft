@@ -7,6 +7,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { downCraft } from 'down-craft';
 import dotenv from 'dotenv';
+import fs from 'fs/promises';
 
 // Load environment variables
 dotenv.config({ path: '../.env' });
@@ -51,7 +52,14 @@ app.post('/upload', async (req, res) => {
         const file = req.files.document;
         const fileType = file.name.split('.').pop().toLowerCase();
         const converterType = req.body.converterType;
-        const fileBuffer = file.data;
+        
+        // Read file buffer from temp file
+        const fileBuffer = await fs.promises.readFile(file.tempFilePath);
+
+        // Validate file size
+        if (fileBuffer.length === 0) {
+            throw new Error('The uploaded file is empty');
+        }
 
         // Validate file type
         if (!['pdf', 'docx', 'pptx', 'xlsx'].includes(fileType)) {
@@ -62,7 +70,7 @@ app.post('/upload', async (req, res) => {
             fileName: file.name,
             fileType,
             converterType,
-            fileSize: file.size
+            fileSize: fileBuffer.length
         });
 
         // For LLM conversion, ensure we have the required environment variables
