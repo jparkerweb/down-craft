@@ -1,4 +1,4 @@
-import { getDocument, OPS } from 'pdfjs-dist';
+import { getDocument, OPS, PDFWorker } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { promises as fs } from 'fs';
 import path from 'path';
 import canvas from 'canvas';
@@ -20,8 +20,6 @@ if (!Promise.withResolvers) {
 }
 
 // Initialize PDF.js worker
-import { PDFWorker } from 'pdfjs-dist';
-
 function createWorker() {
   let resolve, reject;
   const promise = new Promise((res, rej) => {
@@ -90,8 +88,10 @@ async function savePDFAsImages(pdfBuffer, outputDir, scale, pagesPerBatch, jpegQ
   const doc = await getDocument({
     data: pdfData,
     useSystemFonts: true,
-    standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/standard_fonts/'),
+    standardFontDataUrl: path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/generic/'),
     worker: worker._worker,
+    cMapUrl: path.join(__dirname, '../node_modules/pdfjs-dist/legacy/build/generic/'),
+    cMapPacked: true,
     CanvasFactory: NodeCanvasFactory
   }).promise;
 
